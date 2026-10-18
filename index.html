@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Мастер маникюра — программа обучения</title>
+<style>
+  :root{
+    --bg:#fdf8f6;
+    --surface:#ffffff;
+    --primary:#b5637c;
+    --primary-dark:#8a3f56;
+    --primary-soft:#f3dbe2;
+    --accent:#e8c8b8;
+    --text:#2d2430;
+    --muted:#7a6b74;
+    --line:#ecdfe3;
+    --ok:#2e8b57;
+    --err:#c0392b;
+    --radius:16px;
+    --shadow:0 10px 30px rgba(120,60,80,.08);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--primary-dark)}
+  .container{max-width:1080px;margin:0 auto;padding:0 20px}
+
+  /* Header */
+  .header{
+    position:sticky;top:0;z-index:50;
+    background:rgba(253,248,246,.9);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .header-inner{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0}
+  .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .logo-dot{
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--primary),var(--accent));
+    box-shadow:inset 0 0 0 4px #fff3;
+  }
+  .nav{display:flex;gap:6px;flex-wrap:wrap}
+  .nav a{
+    text-decoration:none;color:var(--text);font-size:14px;
+    padding:8px 12px;border-radius:999px;transition:.2s;
+  }
+  .nav a:hover{background:var(--primary-soft);color:var(--primary-dark)}
+
+  /* Hero */
+  .hero{padding:60px 0 40px}
+  .hero h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:0 0 16px}
+  .hero p{font-size:18px;color:var(--muted);max-width:640px;margin:0 0 24px}
+  .badge{
+    display:inline-block;font-size:13px;font-weight:600;
+    background:var(--primary-soft);color:var(--primary-dark);
+    padding:6px 12px;border-radius:999px;margin-bottom:16px;
+  }
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:28px}
+  .stat{
+    background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+    padding:18px;box-shadow:var(--shadow);
+  }
+  .stat b{display:block;font-size:26px;color:var(--primary-dark)}
+  .stat span{font-size:13px;color:var(--muted)}
+
+  /* Sections */
+  section{padding:48px 0}
+  .section-title{font-size:clamp(22px,3vw,30px);margin:0 0 8px}
+  .section-sub{color:var(--muted);margin:0 0 24px;max-width:720px}
+
+  /* Card + tables */
+  .card{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);box-shadow:var(--shadow);
+    overflow:hidden;
+  }
+  .table-wrap{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+  th,td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:#fbefF3;font-weight:600;font-size:13px;color:var(--primary-dark)}
+  tbody tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:#fffafc}
+  td.num,th.num{text-align:center;white-space:nowrap}
+
+  /* Goals list */
+  .goals{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:12px;list-style:none;padding:0;margin:0;
+  }
+  .goals li{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;font-size:14px;position:relative;padding-left:40px;
+  }
+  .goals li::before{
+    content:"✓";position:absolute;left:14px;top:13px;
+    width:18px;height:18px;border-radius:50%;
+    background:var(--primary);color:#fff;font-size:12px;
+    display:flex;align-items:center;justify-content:center;font-weight:700;
+  }
+
+  /* Quiz */
+  .quiz{display:flex;flex-direction:column;gap:14px}
+  .q{
+    background:var(--surface);border:1px solid var(--line);
+    border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);
+  }
+  .q h4{margin:0 0 12px;font-size:15px}
+  .q .opts{display:flex;flex-direction:column;gap:8px}
+  .opt{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    cursor:pointer;font-size:14px;transition:.15s;
+  }
+  .opt:hover{background:#fff7fa;border-color:var(--primary-soft)}
+  .opt input{margin-top:3px;accent-color:var(--primary)}
+  .opt.correct{border-color:var(--ok);background:#eefaf2}
+  .opt.wrong{border-color:var(--err);background:#fdeeec}
+  .opt input:disabled{cursor:not-allowed}
+  .quiz-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+  .btn{
+    border:none;border-radius:12px;padding:12px 20px;font-size:14px;font-weight:600;
+    cursor:pointer;transition:.2s;font-family:inherit;
+  }
+  .btn-primary{background:var(--primary);color:#fff}
+  .btn-primary:hover{background:var(--primary-dark)}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--text)}
+  .btn-ghost:hover{border-color:var(--primary-soft);background:#fff7fa}
+  .result{
+    margin-top:16px;padding:16px 20px;border-radius:12px;font-weight:600;
+    display:none;
+  }
+  .result.show{display:block}
+  .result.pass{background:#eefaf2;color:var(--ok);border:1px solid #bfe6cd}
+  .result.fail{background:#fdeeec;color:var(--err);border:1px solid #f3c4bf}
+
+  /* Checklists */
+  .checklist{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+  .checklist li label{
+    display:flex;gap:10px;align-items:flex-start;
+    padding:10px 12px;border:1px solid var(--line);border-radius:10px;
+    cursor:pointer;font-size:14px;background:var(--surface);
+  }
+  .checklist li label:hover{border-color:var(--primary-soft)}
+  .checklist input{margin-top:3px;accent-color:var(--primary)}
+  .checklist input:checked + span{text-decoration:line-through;color:var(--muted)}
+
+  /* Footer */
+  footer{padding:32px 0 48px;color:var(--muted);font-size:13px;border-top:1px solid var(--line);margin-top:24px}
+
+  /* Print */
+  @media print{
+    .header,.nav,.hero .stats,.quiz-actions,.btn{display:none !important}
+    body{background:#fff}
+    section{padding:12px 0;page-break-inside:avoid}
+    .card,.q,.checklist li label{box-shadow:none}
+  }
+
+  @media (max-width:720px){
+    .stats{grid-template-columns:1fr}
+    .header-inner{flex-direction:column;align-items:flex-start}
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="container header-inner">
+    <div class="logo"><span class="logo-dot"></span> Мастер маникюра</div>
+    <nav class="nav">
+      <a href="#program">Программа</a>
+      <a href="#versions">Версии</a>
+      <a href="#online">Онлайн+офлайн</a>
+      <a href="#schedule">Расписание</a>
+      <a href="#test">Экзамен</a>
+      <a href="#checklists">Чек-листы</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero container" id="top">
+    <span class="badge">Учебный курс · базовая квалификация</span>
+    <h1>Программа обучения<br>мастера маникюра</h1>
+    <p>Структурированный курс с теорией, практикой на моделях, экзаменом и готовыми чек-листами для преподавателя. Три версии по 80, 120 и 160 часов.</p>
+    <div class="stats">
+      <div class="stat"><b>3</b><span>версии курса (80 / 120 / 160 ч)</span></div>
+      <div class="stat"><b>20</b><span>экзаменационных вопросов</span></div>
+      <div class="stat"><b>5</b><span>преподавательских чек-листов</span></div>
+    </div>
+  </section>
+
+  <!-- PROGRAM -->
+  <section class="container" id="program">
+    <h2 class="section-title">Цели обучения</h2>
+    <p class="section-sub">После курса слушатель умеет выполнять услугу безопасно, с соблюдением санитарных норм и пониманием границ компетенции.</p>
+    <ul class="goals">
+      <li>Организовывать рабочее место по санитарным нормам</li>
+      <li>Проводить дезинфекцию и стерилизацию инструментов</li>
+      <li>Объяснять противопоказания и направлять к врачу</li>
+      <li>Выполнять классический, аппаратный и комбинированный маникюр</li>
+      <li>Покрывать ногти гель-лаком по технологии</li>
+      <li>Делать базовый дизайн и укрепление</li>
+      <li>Вести коммуникацию с клиентом и оформлять услугу</li>
+      <li>Собирать портфолио и работать с соцсетями</li>
+    </ul>
+  </section>
+
+  <!-- VERSIONS -->
+  <section class="container" id="versions">
+    <h2 class="section-title">Версии программы: 80 / 120 / 160 часов</h2>
+    <p class="section-sub">Формат: теория / практика, в академических часах.</p>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="versions-table">
+          <thead>
+            <tr>
+              <th>Модуль</th>
+              <th class="num">80 ч</th>
+              <th class="num">120 ч</th>
+              <th class="num">160 ч</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+          <tfoot></tfoot>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ONLINE + OFFLINE -->
+  <section class="container" id="online">
+    <h2 class="section-title">Онлайн-теория + офлайн-практика</h2>
+    <p class="section-sub">Теория — вебинары и LMS. Практика — только офлайн с преподавателем и моделями. К практике допускаются сдавшие тесты по модулям 1–3.</p>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="online-table">
+          <thead>
+            <tr>
+              <th>Модуль</th>
+              <th class="num">Онлайн</th>
+              <th class="num">Офлайн</th>
+              <th>Онлайн-формат</th>
+              <th>Офлайн-формат</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEDULE -->
+  <section class="container" id="schedule">
+    <h2 class="section-title">Расписание по неделям (120 ч)</h2>
+    <p class="section-sub">2 занятия в неделю, 10 недель. Онлайн — теория, офлайн — практика.</p>
+    <div class="card">
+      <div class="table-wrap">
+        <table id="schedule-table">
+          <thead>
+            <tr>
+              <th class="num">Неделя</th>
+              <th class="num">Онлайн</th>
+              <th class="num">Офлайн</th>
+              <th>Содержание</th>
+              <th>Задание</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEST -->
+  <section class="container" id="test">
+    <h2 class="section-title">Экзаменационный тест</h2>
+    <p class="section-sub">20 вопросов, проходной балл — 80% (16 из 20). Выберите ответ и нажмите «Проверить».</p>
+    <form id="quiz" class="quiz" novalidate></form>
+    <div class="quiz-actions">
+      <button type="button" class="btn btn-primary" id="check-quiz">Проверить</button>
+      <button type="button" class="btn btn-ghost" id="reset-quiz">Пройти заново</button>
+    </div>
+    <div id="quiz-result" class="result" role="status" aria-live="polite"></div>
+  </section>
+
+  <!-- CHECKLISTS -->
+  <section class="container" id="checklists">
+    <h2 class="section-title">Чек-листы для преподавателя</h2>
+    <p class="section-sub">Отмечайте пункты во время занятия или экзамена. Кнопка «Печать» скрывает интерфейс и оставляет только чек-листы.</p>
+    <div class="quiz-actions" style="margin-bottom:16px">
+      <button type="button" class="btn btn-ghost" id="print-btn">🖨 Печать</button>
+    </div>
+
+    <h3 style="margin:24px 0 12px">5.1. Практический экзамен (20 баллов)</h3>
+    <ul class="checklist" id="exam-checklist"></ul>
+
+    <h3 style="margin:28px 0 12px">5.2. Санитарный чек-лист</h3>
+    <ul class="checklist" id="sanitary-checklist"></ul>
+
+    <h3 style="margin:28px 0 12px">5.3. Наблюдение за занятием</h3>
+    <ul class="checklist" id="lesson-checklist"></ul>
+
+    <h3 style="margin:28px 0 12px">5.4. Портфолио</h3>
+    <ul class="checklist" id="portfolio-checklist"></ul>
+  </section>
+</main>
+
+<footer class="container">
+  <p>© Программа обучения мастера маникюра. Шаблон для учебного центра. Не является медицинской программой; при признаках заболеваний мастер направляет клиента к врачу.</p>
+</footer>
+
+<script>
+/* ========== ДАННЫЕ ========== */
+
+const modules = [
+  { name: "1. Профессия, сервис, санитарные нормы", v80: [4, 2], v120: [6, 4], v160: [8, 4] },
+  { name: "2. Анатомия, диагностика, противопоказания", v80: [6, 0], v120: [8, 0], v160: [10, 2] },
+  { name: "3. Инструменты, материалы, стерилизация", v80: [4, 4], v120: [6, 4], v160: [6, 8] },
+  { name: "4. Классический маникюр", v80: [4, 12], v120: [6, 14], v160: [6, 16] },
+  { name: "5. Аппаратный и комбинированный маникюр", v80: [2, 10], v120: [4, 10], v160: [4, 14] },
+  { name: "6. Покрытие гель-лаком", v80: [2, 14], v120: [6, 14], v160: [8, 18] },
+  { name: "7. Снятие, уход, укрепление, ремонт", v80: [2, 4], v120: [2, 6], v160: [4, 8] },
+  { name: "8. Базовый дизайн", v80: [0, 4], v120: [2, 6], v160: [4, 8] },
+  { name: "9. Сервис, портфолио, ценообразование", v80: [2, 0], v120: [4, 2], v160: [6, 2] },
+  { name: "10. Практика на моделях", v80: null, v120: [0, 10], v160: [0, 16] },
+  { name: "11. Итоговая аттестация", v80: [1, 3], v120: [2, 4], v160: [2, 6] },
+];
+
+const onlineData = [
+  ["1. Профессия и санитария", 6, 4, "вебинар, видео, тест", "организация места, обработка рук, дезинфекция"],
+  ["2. Анатомия и диагностика", 8, 0, "видеолекции, кейсы, тест", "разбор кейсов в модуле 4"],
+  ["3. Инструменты и стерилизация", 6, 4, "видео, инструкции, тест", "дезинфекция, ультразвук, сухожар, хранение"],
+  ["4. Классический маникюр", 6, 14, "демо-видео, схемы, тест", "3–4 процедуры на моделях"],
+  ["5. Аппаратный / комбинированный", 4, 10, "видео по фрезам, тест", "3 процедуры, работа с фрезами"],
+  ["6. Гель-лак", 6, 14, "видео, разбор ошибок, тест", "5 покрытий, выравнивание, торцы"],
+  ["7. Снятие, уход, ремонт", 2, 6, "видео, чек-листы", "снятие, укрепление, ремонт"],
+  ["8. Дизайн", 2, 6, "видео, референсы", "3 дизайна"],
+  ["9. Сервис и портфолио", 4, 2, "вебинар, шаблоны", "фото работ, консультация клиента"],
+  ["10. Практика на моделях", 0, 10, "—", "полные протоколы услуги"],
+  ["11. Аттестация", 2, 4, "тест онлайн", "практический экзамен офлайн"],
+];
+
+const schedule = [
+  [1, 4, 6, "Модуль 1: профессия, санитария, рабочее место", "тест №1, фото рабочего места"],
+  [2, 6, 6, "Модуль 2: анатомия, диагностика, противопоказания", "тест №2, карта клиента"],
+  [3, 4, 6, "Модуль 3: инструменты, дезинфекция, стерилизация", "тест №3, чек-лист стерилизации"],
+  [4, 4, 10, "Модуль 4: классический маникюр, форма, кутикула", "2 процедуры на моделях"],
+  [5, 4, 8, "Модуль 4–5: классика + аппаратный маникюр", "2 процедуры, фото до/после"],
+  [6, 6, 8, "Модуль 5–6: комбинированный маникюр, подготовка к покрытию", "2 процедуры + 1 покрытие"],
+  [7, 4, 8, "Модуль 6: гель-лак, база, цвет, топ", "3 покрытия"],
+  [8, 4, 6, "Модуль 7–8: снятие, уход, укрепление, дизайн", "снятие + 2 дизайна"],
+  [9, 6, 6, "Модуль 9 + практика: сервис, портфолио, полный протокол", "2 полных протокола, 10 фото"],
+  [10, 4, 10, "Повторение, тест, практический экзамен", "экзамен, защита портфолио"],
+];
+
+const quizData = [
+  { q: "Клиент пришёл с признаками грибка ногтей. Действия мастера?",
+    a: ["Выполнить маникюр с двойной дезинфекцией", "Направить к врачу и не выполнять процедуру", "Срезать поражённую часть", "Покрыть гель-лаком плотным слоем"], correct: 1 },
+  { q: "Правильный порядок обработки многоразового инструмента:",
+    a: ["стерилизация → дезинфекция → очистка", "дезинфекция → предстерилизационная очистка → стерилизация", "очистка → стерилизация → дезинфекция", "дезинфекция → стерилизация → очистка"], correct: 1 },
+  { q: "Что делать при порезе клиента?",
+    a: ["продолжить работу", "остановить кровь, обработать антисептиком, сменить перчатки, оформить запись", "заклеить пластырем и продолжить без обработки", "промыть водой и нанести гель-лак"], correct: 1 },
+  { q: "Основная причина быстрой отслойки гель-лака:",
+    a: ["слишком тонкий топ", "плохая подготовка ногтя / жирная поверхность", "слишком светлый цвет", "полимеризация 60 сек"], correct: 1 },
+  { q: "Праймер наносится:",
+    a: ["на кожу вокруг ногтя", "на подготовленную ногтевую пластину", "на кутикулу", "на топ"], correct: 1 },
+  { q: "При аппаратном маникюре нельзя:",
+    a: ["менять фрезы", "давить фрезой и долго держать на одном месте", "использовать вытяжку", "работать на малых оборотах"], correct: 1 },
+  { q: "Противопоказание к маникюру:",
+    a: ["короткие ногти", "воспаление, открытые раны, грибок", "светлый лак", "сухая кожа"], correct: 1 },
+  { q: "Стерильные инструменты хранят:",
+    a: ["в открытой коробке на столе", "в sealed-пакетах / стерильном контейнере по правилам", "в кармане", "в воде"], correct: 1 },
+  { q: "Толщина базы под гель-лак должна быть:",
+    a: ["максимально толстой", "тонкой / средней, без наплывов", "только на торце", "не важна"], correct: 1 },
+  { q: "Топом необходимо:",
+    a: ["покрыть только центр ногтя", "запечатать торец", "нанести на кожу", "не полимеризовать"], correct: 1 },
+  { q: "Снятие гель-лака:",
+    a: ["отдирать", "по технологии, без травмирования пластины", "срезать кусачками", "спиливать до кожи"], correct: 1 },
+  { q: "При аллергической реакции клиента:",
+    a: ["продолжить", "прекратить, снять материал, направить к врачу", "добавить слой топа", "предложить другой цвет"], correct: 1 },
+  { q: "Журнал стерилизации нужен для:",
+    a: ["красоты", "учёта и контроля обработки инструментов", "рекламы", "хранения пилок"], correct: 1 },
+  { q: "Границы компетенции мастера:",
+    a: ["лечение ногтей", "диагностика и направление к врачу, без лечения", "назначение лекарств", "удаление ногтя"], correct: 1 },
+  { q: "Кутикулу обрабатывают:",
+    a: ["с глубоким иссечением", "аккуратно, без травм и порезов", "без антисептики", "только ножницами"], correct: 1 },
+  { q: "Полимеризацию проводят:",
+    a: ["по инструкции производителя", "всегда 10 сек", "без лампы", "только на солнце"], correct: 0 },
+  { q: "Перед покрытием ноготь:",
+    a: ["обезжиривают и готовят", "смазывают кремом", "моют без сушки", "полируют до блеска кожу"], correct: 0 },
+  { q: "Инструмент после дезинфекции:",
+    a: ["сразу убирают", "проходят предстерилизационную очистку и стерилизацию", "протирают полотенцем", "хранят в воде"], correct: 1 },
+  { q: "Если клиент просит «срезать побольше кутикулы»:",
+    a: ["выполнить просьбу", "объяснить риск травмы и сделать безопасно", "отказаться от услуги", "использовать только аппарат"], correct: 1 },
+  { q: "Фото работ в портфолио:",
+    a: ["только чужие", "свои работы до/после, с согласия клиента", "без согласия", "только реклама"], correct: 1 },
+];
+
+const examChecklist = [
+  "Обработка рук и рабочего места",
+  "Дезинфекция / стерилизация инструментов",
+  "Диагностика и вопросы клиенту",
+  "Подготовка ногтей и форма",
+  "Работа с кутикулой без порезов",
+  "Покрытие без наплывов",
+  "Торцы и полимеризация",
+  "Дизайн по заданию",
+  "Финальный уход и рекомендации",
+  "Коммуникация и эргономика",
+];
+const sanitaryChecklist = [
+  "Руки мастера обработаны до и после процедуры",
+  "Перчатки сменены",
+  "Рабочая поверхность обработана",
+  "Инструмент прошёл дезинфекцию",
+  "Проведена предстерилизационная очистка",
+  "Стерилизация подтверждена индикатором / журналом",
+  "Одноразовые расходники новые",
+  "Отходы утилизированы",
+  "Стерильный инструмент хранится правильно",
+  "Вытяжка / лампа в рабочем состоянии",
+];
+const lessonChecklist = [
+  "Преподаватель объяснил цель и критерии",
+  "Был показ техники и разбор ошибок",
+  "Соблюдалась санитария и безопасность",
+  "Достаточно индивидуальной обратной связи",
+  "Уложились в тайминг",
+  "Слушатели отработали руками",
+  "Домашнее задание понятно",
+];
+const portfolioChecklist = [
+  "Не менее 10 своих фото",
+  "Есть фото «до / после»",
+  "Разные техники: классика, аппарат, покрытие",
+  "Минимум 3 дизайна",
+  "Фото чёткие, без чужих работ",
+  "Есть согласие клиентов на публикацию",
+  "Подписаны работы: техника, материалы",
+  "Нет грубых дефектов покрытия",
+  "Портфолио оформлено аккуратно",
+  "Слушатель может объяснить этапы работ",
+];
+
+/* ========== РЕНДЕР ТАБЛИЦ ========== */
+
+function fmt(cell) {
+  if (!cell) return "—";
+  return `${cell[0]} / ${cell[1]} = <b>${cell[0] + cell[1]}</b>`;
+}
+
+function renderVersions() {
+  const tbody = document.querySelector("#versions-table tbody");
+  const tfoot = document.querySelector("#versions-table tfoot");
+  tbody.innerHTML = modules.map(m => `
+    <tr>
+      <td>${m.name}</td>
+      <td class="num">${fmt(m.v80)}</td>
+      <td class="num">${fmt(m.v120)}</td>
+      <td class="num">${fmt(m.v160)}</td>
+    </tr>
+  `).join("");
+
+  const sum = (key) => modules.reduce((acc, m) => {
+    if (!m[key]) return acc;
+    acc[0] += m[key][0]; acc[1] += m[key][1];
+    return acc;
+  }, [0, 0]);
+
+  const s80 = sum("v80"), s120 = sum("v120"), s160 = sum("v160");
+  tfoot.innerHTML = `
+    <tr style="background:#fbefF3;font-weight:700">
+      <td>Итого</td>
+      <td class="num">${s80[0]} / ${s80[1]} = ${s80[0]+s80[1]}</td>
+      <td class="num">${s120[0]} / ${s120[1]} = ${s120[0]+s120[1]}</td>
+      <td class="num">${s160[0]} / ${s160[1]} = ${s160[0]+s160[1]}</td>
+    </tr>`;
+}
+
+function renderOnline() {
+  const tbody = document.querySelector("#online-table tbody");
+  tbody.innerHTML = onlineData.map(r => `
+    <tr>
+      <td>${r[0]}</td>
+      <td class="num">${r[1]}</td>
+      <td class="num">${r[2]}</td>
+      <td>${r[3]}</td>
+      <td>${r[4]}</td>
+    </tr>
+  `).join("") + `
+    <tr style="background:#fbefF3;font-weight:700">
+      <td>Итого</td>
+      <td class="num">${onlineData.reduce((s,r)=>s+r[1],0)}</td>
+      <td class="num">${onlineData.reduce((s,r)=>s+r[2],0)}</td>
+      <td colspan="2"></td>
+    </tr>`;
+}
+
+function renderSchedule() {
+  const tbody = document.querySelector("#schedule-table tbody");
+  tbody.innerHTML = schedule.map(r => `
+    <tr>
+      <td class="num">${r[0]}</td>
+      <td class="num">${r[1]}</td>
+      <td class="num">${r[2]}</td>
+      <td>${r[3]}</td>
+      <td>${r[4]}</td>
+    </tr>
+  `).join("") + `
+    <tr style="background:#fbefF3;font-weight:700">
+      <td class="num">Итого</td>
+      <td class="num">${schedule.reduce((s,r)=>s+r[1],0)}</td>
+      <td class="num">${schedule.reduce((s,r)=>s+r[2],0)}</td>
+      <td colspan="2"></td>
+    </tr>`;
+}
+
+/* ========== ТЕСТ ========== */
+
+const quizForm = document.getElementById("quiz");
+const quizResult = document.getElementById("quiz-result");
+
+function renderQuiz() {
+  quizForm.innerHTML = quizData.map((item, i) => `
+    <div class="q" data-index="${i}">
+      <h4>${i + 1}. ${item.q}</h4>
+      <div class="opts">
+        ${item.a.map((opt, j) => `
+          <label class="opt">
+            <input type="radio" name="q${i}" value="${j}">
+            <span>${opt}</span>
+          </label>
+        `).join("")}
+      </div>
+    </div>
+  `).join("");
+  quizResult.className = "result";
+  quizResult.textContent = "";
+}
+
+function checkQuiz() {
+  let score = 0;
+  quizData.forEach((item, i) => {
+    const block = quizForm.querySelector(`.q[data-index="${i}"]`);
+    const opts = block.querySelectorAll(".opt");
+    const selected = quizForm.querySelector(`input[name="q${i}"]:checked`);
+    opts.forEach(o => o.classList.remove("correct", "wrong"));
+    opts.forEach((o, j) => {
+      if (j === item.correct) o.classList.add("correct");
+    });
+    if (selected) {
+      const val = Number(selected.value);
+      if (val === item.correct) score++;
+      else opts[val].classList.add("wrong");
+    }
+    block.querySelectorAll("input").forEach(inp => inp.disabled = true);
+  });
+
+  const pass = score >= 16;
+  quizResult.className = "result show " + (pass ? "pass" : "fail");
+  quizResult.textContent = `Результат: ${score} из ${quizData.length} (${Math.round(score / quizData.length * 100)}%). ` +
+    (pass ? "Экзамен сдан. Допуск к практике подтверждён." : "Экзамен не сдан. Проходной балл — 16 из 20. Повторите модули и пройдите тест заново.");
+}
+
+document.getElementById("check-quiz").addEventListener("click", checkQuiz);
+document.getElementById("reset-quiz").addEventListener("click", renderQuiz);
+
+/* ========== ЧЕК-ЛИСТЫ ========== */
+
+function renderChecklist(id, items) {
+  const ul = document.getElementById(id);
+  ul.innerHTML = items.map((t, i) => `
+    <li>
+      <label>
+        <input type="checkbox">
+        <span>${t}</span>
+      </label>
+    </li>
+  `).join("");
+}
+
+function renderAllChecklists() {
+  renderChecklist("exam-checklist", examChecklist);
+  renderChecklist("sanitary-checklist", sanitaryChecklist);
+  renderChecklist("lesson-checklist", lessonChecklist);
+  renderChecklist("portfolio-checklist", portfolioChecklist);
+}
+
+document.getElementById("print-btn").addEventListener("click", () => window.print());
+
+/* ========== INIT ========== */
+
+renderVersions();
+renderOnline();
+renderSchedule();
+renderQuiz();
+renderAllChecklists();
+</script>
+</body>
+</html>
